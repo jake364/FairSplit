@@ -1,5 +1,24 @@
 const mongoose = require("mongoose");
 
+const splitSchema = new mongoose.Schema({
+  week: {
+    type: String,
+    required: true
+  },
+  splitDetails: [
+    {
+      roommateId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Roommate"
+      },
+      amountOwed: {
+        type: Number,
+        required: true
+      }
+    }
+  ]
+});
+
 const expenseSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -15,20 +34,13 @@ const expenseSchema = new mongoose.Schema({
   },
   paidBy: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Roommate",
-    required: true
+    ref: "Roommate"
   },
   date: {
     type: Date,
     default: Date.now
   },
-  splits: [{
-    roommate: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Roommate"
-    },
-    amount: Number
-  }]
+  splits: [splitSchema] 
 });
-
-module.exports = mongoose.model("Expense", expenseSchema);
+const Expense = mongoose.model("Expense", expenseSchema);
+module.exports = Expense;

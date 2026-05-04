@@ -7,9 +7,9 @@ const roommateSchema = new mongoose.Schema({
   },
   householdId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Household",
-    required: true
-  }
+    ref: "Household" // NOTE: I had to look up ref as I wanted automatic linking as it in theory is easier and I'm still learning things about mongoose. Jake C
+  } 
 });
 
-module.exports = mongoose.model("Roommate", roommateSchema);
+const Roommate = mongoose.model("Roommate", roommateSchema);
+module.exports = Roommate;
