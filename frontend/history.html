@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FairSplit | Roommate Expense Tracker</title>
+    <title>History | FairSplit</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -35,6 +35,7 @@
             </div>
         </div>
     </nav>
+
     <header>
         <div class="hero-banner">
             <div class="hero-copy">
@@ -58,12 +59,12 @@
         </div>
     </header>
 
-    <main class="container">
-        <section id="balances">
-            <h2>Current Balances</h2>
-            <div id="balanceList" class="card-grid"></div>
-        </section>
-    </main>
+    <section id="history" class="page-section">
+        <div class="section-container">
+            <h2>Recent History</h2>
+            <ul id="expense-history"></ul>
+        </div>
+    </section>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/main.js"></script>

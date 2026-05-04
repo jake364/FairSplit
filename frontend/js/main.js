@@ -42,4 +42,45 @@ document.addEventListener('DOMContentLoaded', () => {
         card.style.transition = 'transform 0.6s ease, opacity 0.6s ease';
         observer.observe(card);
     });
+
+    // Add roommate functionality with nice card design
+    $('#addRoommateBtn').on('click', function() {
+        const name = $('#roommateName').val().trim();
+        if (name) {
+            const roommateCard = `
+                <div class="roommate-card">
+                    <div class="roommate-avatar">${name.charAt(0).toUpperCase()}</div>
+                    <div class="roommate-info">
+                        <h3>${name}</h3>
+                        <p class="roommate-status">Active</p>
+                    </div>
+                    <button class="roommate-remove" data-name="${name}">✕</button>
+                </div>
+            `;
+            $('#roommateList').append(roommateCard);
+            $('#roommateName').val('');
+        }
+    });
+
+    // Remove roommate functionality
+    $(document).on('click', '.roommate-remove', function() {
+        $(this).closest('.roommate-card').fadeOut(300, function() {
+            $(this).remove();
+        });
+    });
+
+    // Roommate search functionality
+    $('#roommateSearch').on('keyup', function() {
+        const searchTerm = $(this).val().toLowerCase();
+        $('.roommate-card').each(function() {
+            const roommateNameEl = $(this).find('.roommate-info h3');
+            const roommateNameText = roommateNameEl.text().toLowerCase();
+            
+            if (roommateNameText.includes(searchTerm)) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+    });
 });
