@@ -16,7 +16,7 @@ function addRoommate() {
   }
 
   $.ajax({
-    url: API_URL + "/roommates",
+    url: API + "/roommates",
     method: "POST",
     contentType: "application/json",
     data: JSON.stringify({

@@ -61,7 +61,31 @@
     <main class="container">
         <section id="balances">
             <h2>Current Balances</h2>
-            <div id="balanceList" class="card-grid"></div>
+            <div id="balanceList" class="card-grid">
+                </div>
+        </section>
+
+        <section id="add-expense">
+            <h2>Log an Expense</h2>
+            <div class="form-layout">
+                <form id="expense-form">
+                    <input type="text" id="description" placeholder="What was it for? (e.g. Electricity)" required>
+                    <input type="number" id="amount" placeholder="Amount ($)" step="0.01" required>
+                    <select id="paid-by">
+                        <option value="">Who paid?</option>
+                    </select>
+                    <button type="submit">Add Expense</button>
+                </form>
+                <figure class="form-visual">
+                    <img src="images/expense-illustration.svg" alt="Expense tracking illustration">
+                </figure>
+            </div>
+        </section>
+
+        <section id="history">
+            <h2>Recent History</h2>
+            <ul id="expense-history">
+                </ul>
         </section>
     </main>
 
