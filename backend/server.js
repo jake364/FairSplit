@@ -13,7 +13,7 @@ app.use("/expenses", require("./routes/expenses"));
 app.use("/payments", require("./routes/payments"));
 app.use("/balances", require("./routes/balances"));
 
-mongoose.connect("your_mongodb_connection_string")
+mongoose.connect("mongodb+srv://group7:p%40ssw0rd@groupproject.9daacyt.mongodb.net/?appName=groupProject")
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
 

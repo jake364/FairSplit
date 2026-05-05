@@ -66,9 +66,12 @@
                 <form id="expense-form">
                     <input type="text" id="description" placeholder="What was it for? (e.g. Electricity)" required>
                     <input type="number" id="amount" placeholder="Amount ($)" step="0.01" required>
-                    <select id="paid-by">
-                        <option value="">Who paid?</option>
-                    </select>
+                    
+                    <div id="splitContainer" style="margin-top: 1rem;">
+                        <label style="display: block; font-weight: 600; color: var(--text); margin-bottom: 0.8rem;">Split among:</label>
+                        <div id="splitOptions" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                    </div>
+                    
                     <button type="submit">Add Expense</button>
                 </form>
                 <figure class="form-visual">
@@ -79,6 +82,10 @@
     </section>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/expenses.js"></script>
+    <script src="js/balances.js"></script>
+    <script src="js/roommates.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

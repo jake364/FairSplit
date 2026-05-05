@@ -521,6 +521,55 @@ button:hover {
     transform: scale(1.1);
 }
 
+
+.balance-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    border-left: 5px solid #ddd;
+}
+
+.status-positive { border-left-color: #4fa870; }
+.status-negative { border-left-color: #e74c3c; }
+
+.roommate-name {
+    display: block;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.balance-details {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.balance-amount {
+    text-align: right;
+}
+
+.balance-amount .amount {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.status-positive .amount { color: #4fa870; }
+.status-negative .amount { color: #e74c3c; }
+
+.balance-amount .label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #888;
+}
+
 @media (max-width: 920px) {
     .hero-banner,
     .form-layout {
