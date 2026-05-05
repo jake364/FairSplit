@@ -9,6 +9,7 @@
 <body>
     <nav>
         <div class="nav-container">
+            <a href="index.html" class="brand-mark">FairSplit</a>
             <div class="nav-item">
                 <a href="index.html" class="nav-link">
                     <img src="images/icon-balances.svg" alt="" class="nav-icon">
@@ -60,16 +61,35 @@
 
     <main class="container">
     <section id="balances">
-        <h2>Current Balances</h2>
+        <div class="section-heading">
+            <div>
+                <span class="section-kicker">Overview</span>
+                <h2>Current Balances</h2>
+            </div>
+            <p>See who is owed and who needs to settle up.</p>
+        </div>
         
-        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 0.5rem;">
-            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
-                <input id="balanceSearch" type="text" placeholder="Search roommate..." style="padding: 0.75rem 1rem; border: 1px solid rgba(78, 165, 101, 0.24); border-radius: 12px; background: #f8fbf7; color: var(--text); flex: 1; min-width: 250px;" />
-                <button id="clearBalanceSearch" style="padding: 0.75rem 1.5rem; background: var(--primary-soft); color: white; border: none; border-radius: 12px; cursor: pointer; font-weight: 600;">Clear</button>
+        <div class="toolbar balance-toolbar">
+            <div class="search-control">
+                <input id="balanceSearch" type="text" placeholder="Search roommate..." />
+                <button id="clearBalanceSearch" type="button" class="button-secondary">Clear</button>
             </div>
             
-            <div id="chartContainer" style="display: none; max-width: 400px; margin: 0;">
-                <canvas id="balanceChart"></canvas>
+            <div id="chartContainer" class="charts-grid">
+                <div class="chart-panel">
+                    <div class="chart-heading">
+                        <h3>Amount Due by Roommate</h3>
+                        <p>Based on each roommate's current owed total.</p>
+                    </div>
+                    <canvas id="balanceChart"></canvas>
+                </div>
+                <div class="chart-panel">
+                    <div class="chart-heading">
+                        <h3>Net Balance by Roommate</h3>
+                        <p>Positive means they are owed. Negative means they owe.</p>
+                    </div>
+                    <canvas id="balanceBarChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -80,7 +100,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/balances.js"></script>
-    <script src="js/roommates.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

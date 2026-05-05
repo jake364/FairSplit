@@ -9,6 +9,7 @@
 <body>
     <nav>
         <div class="nav-container">
+            <a href="index.html" class="brand-mark">FairSplit</a>
             <div class="nav-item">
                 <a href="index.html" class="nav-link">
                     <img src="images/icon-balances.svg" alt="" class="nav-icon">
@@ -61,15 +62,24 @@
 
     <section id="add-expense" class="page-section">
         <div class="section-container">
-            <h2>Log an Expense</h2>
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">Entry</span>
+                    <h2>Log an Expense</h2>
+                </div>
+                <p>Add a shared cost and choose who should be included.</p>
+            </div>
             <div class="form-layout">
                 <form id="expense-form">
                     <input type="text" id="description" placeholder="What was it for? (e.g. Electricity)" required>
                     <input type="number" id="amount" placeholder="Amount ($)" step="0.01" required>
+                    <select id="paidBy" required>
+                        <option value="">Who paid?</option>
+                    </select>
                     
-                    <div id="splitContainer" style="margin-top: 1rem;">
-                        <label style="display: block; font-weight: 600; color: var(--text); margin-bottom: 0.8rem;">Split among:</label>
-                        <div id="splitOptions" style="display: flex; flex-direction: column; gap: 0.5rem;"></div>
+                    <div id="splitContainer" class="split-container">
+                        <label>Split among</label>
+                        <div id="splitOptions" class="split-options"></div>
                     </div>
                     
                     <button type="submit">Add Expense</button>
@@ -84,8 +94,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/expenses.js"></script>
-    <script src="js/balances.js"></script>
-    <script src="js/roommates.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

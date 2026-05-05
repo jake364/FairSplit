@@ -1,68 +1,90 @@
 let balancesArray = []
 let balanceChart = null
+let balanceBarChart = null
+let chartHasAnimated = false
+let barChartHasAnimated = false
 
-// Load balances from the backend API and display as cards
-// Backend logic: Calculates balances by:
-// 1. Getting all roommates, expenses, and payments
-// 2. For each expense, adding to paidBy roommate's "paid" and to owed roommates' "owed"
-// 3. Subtracting payments from the "paid" amount
-// 4. Calculating final balance = paid - owed
+function balanceStatusClass(balance) {
+  return balance > 0 ? "status-positive" : "status-negative"
+}
+
+function balanceStatusText(balance) {
+  return balance > 0 ? "is owed" : "owes"
+}
+
+function balanceCardTemplate(balance) {
+  return `
+    <div class="balance-card ${balanceStatusClass(balance.balance)}">
+      <div class="balance-card-inner">
+        <div>
+          <strong class="roommate-name">${balance.name}</strong>
+          <p class="balance-line">Paid: $${balance.paid.toFixed(2)}</p>
+          <p class="balance-line">Due: $${balance.owed.toFixed(2)}</p>
+        </div>
+        <div class="balance-amount">
+          <span class="amount">$${Math.abs(balance.balance).toFixed(2)}</span>
+          <span class="label">${balanceStatusText(balance.balance)}</span>
+        </div>
+      </div>
+    </div>
+  `
+}
+
 function loadBalances() {
-  $.get(API + "/balances", function(balancesObj) {
+  $.when($.get(API + "/roommates"), $.get(API + "/expenses")).done(function(roommatesResponse, expensesResponse) {
     $("#balanceList").empty()
 
-    // Convert object to array and sort by balance
-    balancesArray = Object.keys(balancesObj).map(function(key) {
-      return {
-        id: key,
-        name: balancesObj[key].name,
-        paid: balancesObj[key].paid,
-        owed: balancesObj[key].owed,
-        balance: balancesObj[key].balance
+    const roommates = roommatesResponse[0]
+    const expenses = expensesResponse[0]
+    const balancesObj = {}
+
+    roommates.forEach(function(roommate) {
+      balancesObj[roommate._id] = {
+        id: roommate._id,
+        name: roommate.name,
+        paid: 0,
+        owed: 0,
+        balance: 0
       }
+    })
+
+    expenses.forEach(function(expense) {
+      if (expense.paidBy && balancesObj[expense.paidBy]) {
+        balancesObj[expense.paidBy].paid += Number(expense.amount || 0)
+      }
+
+      if (expense.splits && expense.splits.length > 0) {
+        expense.splits.forEach(function(split) {
+          if (!split.splitDetails) return
+          split.splitDetails.forEach(function(detail) {
+            const roommateId = detail.roommateId
+            if (roommateId && balancesObj[roommateId]) {
+              balancesObj[roommateId].owed += Number(detail.amountOwed || 0)
+            }
+          })
+        })
+      }
+    })
+
+    balancesArray = Object.keys(balancesObj).map(function(key) {
+      const balance = balancesObj[key]
+      balance.balance = balance.paid - balance.owed
+      return balance
     }).sort(function(a, b) {
-      return b.balance - a.balance // Sort by balance descending
+      return b.balance - a.balance
     })
 
     if (balancesArray.length === 0) {
-      $("#balanceList").append("<p style='text-align: center; color: var(--muted); padding: 2rem; grid-column: 1 / -1;'>No roommates or balances yet.</p>")
+      $("#balanceList").append('<p class="empty-state">No roommates or balances yet.</p>')
       $("#chartContainer").hide()
       return
     }
 
-    // Render balance cards
-    balancesArray.forEach(function(balance) {
-      let statusColor = balance.balance > 0 ? "#4fa870" : "#e74c3c"
-      let statusText = balance.balance > 0 ? "is owed" : "owes"
-      
-      const balanceCard = `
-        <div class="balance-card" style="border-left: 4px solid ${statusColor};">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;">
-            <div>
-              <strong style="display: block; margin-bottom: 0.5rem; color: var(--muted);">${balance.name}</strong>
-              <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">
-                Paid: $${balance.paid.toFixed(2)}
-              </p>
-              <p style="margin: 0.25rem 0 0 0; font-size: 0.9rem; color: var(--muted);">
-                Due: $${balance.owed.toFixed(2)}
-              </p>
-            </div>
-            <div style="text-align: right; min-width: 120px;">
-              <span style="font-size: 1.5rem; font-weight: 700; color: ${statusColor};">$${Math.abs(balance.balance).toFixed(2)}</span>
-              <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--muted);">${statusText}</p>
-            </div>
-          </div>
-        </div>
-      `
-      $("#balanceList").append(balanceCard)
-    })
-
-    // Initialize chart with all roommates
-    updateBalanceChart(balancesArray)
-    $("#chartContainer").show()
+    renderBalanceCards(balancesArray)
+    updateBalanceCharts(balancesArray)
   }).fail(function(error) {
     console.error("Error loading balances:", error)
-    $("#balanceList").html("<p style='color: red; padding: 2rem;'>Error loading balances</p>")
+    $("#balanceList").html('<p class="error-state">Error loading balances.</p>')
   })
 }
 
@@ -70,100 +92,166 @@ function renderBalanceCards(data) {
   $("#balanceList").empty()
 
   if (data.length === 0) {
-    $("#balanceList").append("<p style='text-align: center; color: var(--muted); padding: 2rem; grid-column: 1 / -1;'>No roommate matches your search.</p>")
+    $("#balanceList").append('<p class="empty-state">No roommate matches your search.</p>')
     return
   }
 
   data.forEach(function(balance) {
-    let statusColor = balance.balance > 0 ? "#4fa870" : "#e74c3c"
-    let statusText = balance.balance > 0 ? "is owed" : "owes"
-    
-    const balanceCard = `
-      <div class="balance-card" style="border-left: 4px solid ${statusColor};">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <strong style="display: block; margin-bottom: 0.5rem; color: var(--muted);">${balance.name}</strong>
-            <p style="margin: 0; font-size: 0.9rem; color: var(--muted);">
-              Paid: $${balance.paid.toFixed(2)} | Owes: $${balance.owed.toFixed(2)}
-            </p>
-          </div>
-          <div style="text-align: right;">
-            <span style="font-size: 1.5rem; font-weight: 700; color: ${statusColor};">$${Math.abs(balance.balance).toFixed(2)}</span>
-            <p style="margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--muted);">${statusText}</p>
-          </div>
-        </div>
-      </div>
-    `
-    $("#balanceList").append(balanceCard)
+    $("#balanceList").append(balanceCardTemplate(balance))
   })
 }
 
-function updateBalanceChart(data) {
-  const canvas = document.getElementById("balanceChart")
-  if (!canvas) return
+function updateBalanceCharts(data) {
+  const pieCanvas = document.getElementById("balanceChart")
+  const barCanvas = document.getElementById("balanceBarChart")
+  if (!pieCanvas || !barCanvas) return
 
   const labels = data.map(item => item.name)
-  const amounts = data.map(item => item.owed)
-  const totalOwed = amounts.reduce((sum, value) => sum + value, 0)
+  const owedAmounts = data.map(item => item.owed)
+  const netAmounts = data.map(item => item.balance)
+  const totalOwed = owedAmounts.reduce((sum, value) => sum + value, 0)
+  const hasNetBalance = netAmounts.some(value => value !== 0)
 
-  if (totalOwed <= 0) {
+  if (totalOwed <= 0 && !hasNetBalance) {
     $("#chartContainer").hide()
     if (balanceChart) {
       balanceChart.destroy()
       balanceChart = null
     }
+    if (balanceBarChart) {
+      balanceBarChart.destroy()
+      balanceBarChart = null
+    }
     return
   }
 
-  const colors = [
-    '#2d7a45',
-    '#5cb85c',
-    '#8bc34a',
-    '#74b27f',
-    '#4fa870',
-    '#486a55',
-    '#3a5a37',
-    '#6dc266'
+  const pieColors = [
+    "#146c43",
+    "#c65f3d",
+    "#2f80ed",
+    "#8a5cf6",
+    "#12a594",
+    "#f2994a",
+    "#667085",
+    "#0f5132"
   ]
+  const barColors = netAmounts.map(value => value >= 0 ? "#146c43" : "#c03221")
 
   if (balanceChart) {
-    balanceChart.destroy()
-  }
-
-  balanceChart = new Chart(canvas, {
-    type: 'doughnut',
-    data: {
-      labels: labels,
-      datasets: [{
-        data: amounts,
-        backgroundColor: colors.slice(0, labels.length),
-        borderColor: '#fff',
-        borderWidth: 2
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: {
-            font: { size: 12 },
-            color: '#486a55',
-            padding: 15
-          }
+    balanceChart.data.labels = labels
+    balanceChart.data.datasets[0].data = owedAmounts
+    balanceChart.data.datasets[0].backgroundColor = pieColors.slice(0, labels.length)
+    balanceChart.update("none")
+  } else if (totalOwed > 0) {
+    balanceChart = new Chart(pieCanvas, {
+      type: "doughnut",
+      data: {
+        labels: labels,
+        datasets: [{
+          data: owedAmounts,
+          backgroundColor: pieColors.slice(0, labels.length),
+          borderColor: "#fff",
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: chartHasAnimated ? false : {
+          animateRotate: true,
+          duration: 900
         },
-        tooltip: {
-          callbacks: {
-            label: function(context) {
-              return context.label + ': $' + context.parsed.toFixed(2)
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              font: { size: 12 },
+              color: "#667085",
+              padding: 14
+            }
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                return context.label + ": $" + context.parsed.toFixed(2) + " due"
+              }
             }
           }
         }
       }
-    }
-  })
-  $("#chartContainer").show()
+    })
+    chartHasAnimated = true
+  }
+
+  if (balanceBarChart) {
+    balanceBarChart.data.labels = labels
+    balanceBarChart.data.datasets[0].data = netAmounts
+    balanceBarChart.data.datasets[0].backgroundColor = barColors
+    balanceBarChart.update("none")
+  } else {
+    balanceBarChart = new Chart(barCanvas, {
+      type: "bar",
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Net balance",
+          data: netAmounts,
+          backgroundColor: barColors,
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: barChartHasAnimated ? false : {
+          duration: 800
+        },
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            callbacks: {
+              label: function(context) {
+                const value = context.parsed.y
+                const label = value >= 0 ? "is owed" : "owes"
+                return "$" + Math.abs(value).toFixed(2) + " " + label
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#667085"
+            },
+            grid: {
+              display: false
+            }
+          },
+          y: {
+            ticks: {
+              color: "#667085",
+              callback: function(value) {
+                return "$" + value
+              }
+            },
+            grid: {
+              color: function(context) {
+                return context.tick.value === 0 ? "#1d2939" : "#e5ebe7"
+              },
+              lineWidth: function(context) {
+                return context.tick.value === 0 ? 3 : 1
+              }
+            }
+          }
+        }
+      }
+    })
+    barChartHasAnimated = true
+  }
+
+  $("#chartContainer").css("display", "grid")
 }
 
 function searchBalances(searchTerm) {
@@ -176,32 +264,27 @@ function searchBalances(searchTerm) {
   renderBalanceCards(filtered)
 
   if (filtered.length > 0) {
-    updateBalanceChart(filtered)
-    $("#chartContainer").show()
+    updateBalanceCharts(filtered)
   } else {
     $("#chartContainer").hide()
   }
 }
 
-// Event: Search input
 $(document).on("input", "#balanceSearch", function() {
   searchBalances($(this).val())
 })
 
-// Event: Clear button
 $(document).on("click", "#clearBalanceSearch", function() {
   $("#balanceSearch").val("")
   searchBalances("")
 })
 
-// Reload balances every 5 seconds to keep data fresh
 function startBalanceRefresh() {
   setInterval(function() {
     loadBalances()
   }, 5000)
 }
 
-// Initialize on page load
 $(document).ready(function() {
   loadBalances()
   startBalanceRefresh()
