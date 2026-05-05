@@ -13,7 +13,7 @@ app.use("/expenses", require("./routes/expenses"));
 app.use("/payments", require("./routes/payments"));
 app.use("/balances", require("./routes/balances"));
 
-mongoose.connect("mongodb+srv://group7:p%40ssw0rd@groupproject.9daacyt.mongodb.net/?appName=groupProject")
+mongoose.connect("mongodb+srv://group7:p%40ssw0rd@groupproject.9daacyt.mongodb.net/FairSplit?appName=groupProject")
   .then(() => console.log("MongoDB connected"))
   .catch(err => console.log(err));
 
