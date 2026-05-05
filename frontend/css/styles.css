@@ -44,8 +44,11 @@ body::before {
 }
 
 header {
-    padding: 3rem 1.5rem 1.5rem;
+    padding: 3rem 1.5rem 0rem; 
 }
+
+
+
 
 .hero-banner {
     width: min(1220px, calc(100% - 2rem));
@@ -204,13 +207,15 @@ nav {
     color: var(--primary);
 }
 
+
 main.container {
     width: min(1200px, calc(100% - 2rem));
-    margin: -3rem auto 3rem;
+    margin: -1rem auto 3rem; 
     display: grid;
     gap: 1.5rem;
     padding-bottom: 2rem;
 }
+
 
 .overview {
     display: grid;
@@ -253,7 +258,7 @@ section {
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid var(--border);
     border-radius: 28px;
-    padding: 1.8rem;
+    padding: 1rem 1.8rem 1.8rem; /* Reduced top padding from 1.8 to 1 */
     box-shadow: 0 12px 34px rgba(80, 118, 86, 0.08);
     backdrop-filter: blur(10px);
 }
@@ -388,6 +393,17 @@ button:hover {
 
 #expense-history li span {
     color: var(--muted);
+}
+
+#chartContainer {
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+#balanceChart {
+    width: 100% !important;
+    height: 320px !important;
+    display: block;
 }
 
 .page-section {
@@ -637,4 +653,32 @@ button:hover {
     .page-section h2 {
         font-size: 1.5rem;
     }
+
+    /* 1. Pull the white card UP into the green banner more aggressively */
+    main.container {
+        margin-top: -6rem !important; /* Changed from -3rem to -6rem */
+    }
+
+    /* 2. Remove the extra "air" at the bottom of the hero banner area */
+    header {
+        padding-bottom: 0 !important;
+    }
+
+    /* 3. Fix the internal gap between the search bar and the list */
+    #balances > div:first-of-type {
+        margin-bottom: 0.5rem !important;
+        gap: 0.5rem !important;
+    }
+
+    /* 4. Ensure the chart container doesn't take up space if it's empty */
+    #chartContainer:empty {
+        display: none !important;
+    }
+
+    /* 5. Tighten the heading space */
+    section h2 {
+        margin-bottom: 0.75rem !important;
+}
+
+
 }

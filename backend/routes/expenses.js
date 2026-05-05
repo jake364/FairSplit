@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Expense = require("../models/Expense");
 
-// GET /expenses
+
 router.get("/", async function(req, res){
   try{
     const expenses= await Expense.find();
@@ -13,16 +13,17 @@ router.get("/", async function(req, res){
   }
 });
 
-// POST /expenses
+
 router.post("/", async function(req, res){
   try{
-    const tempExpense= new Expense({
+    const tempExpense = new Expense({
       title: req.body.title,
       amount: req.body.amount,
       category: req.body.category,
-      paidBy: req.body.paidBy
+      paidBy: req.body.paidBy,
+      splitWith: req.body.splitWith //saves who it is shared
     });
-    const savedExpense= await tempExpense.save();
+    const savedExpense = await tempExpense.save();
     res.status(201).json(savedExpense);
   } 
   catch (err){
@@ -30,7 +31,7 @@ router.post("/", async function(req, res){
   }
 });
 
-// GET /expenses/:id
+
 router.get("/:id", async function(req, res){
   try{
     const expense= await Expense.findById(req.params.id);
@@ -62,7 +63,7 @@ router.put("/:id", async function(req, res){
   }
 });
 
-// DELETE /expenses/:id
+//delete
 router.delete("/:id", async function(req, res){
   try{
     const expense= await Expense.findByIdAndDelete(req.params.id);
@@ -77,7 +78,7 @@ router.delete("/:id", async function(req, res){
   }
 });
 
-// POST /expenses/:id/splits
+
 router.post("/:id/splits", async function(req, res){
   try{
     const expense= await Expense.findById(req.params.id);
@@ -97,7 +98,7 @@ router.post("/:id/splits", async function(req, res){
   }
 });
 
-// GET /expenses/:id/splits
+//get
 router.get("/:id/splits", async function(req, res){
   try{
     const expense= await Expense.findById(req.params.id);
@@ -111,7 +112,7 @@ router.get("/:id/splits", async function(req, res){
   }
 });
 
-// GET /expenses/:id/splits/:splitid
+//expenses 
 router.get("/:id/splits/:splitid", async function(req, res){
   try{
     const expense= await Expense.findById(req.params.id);

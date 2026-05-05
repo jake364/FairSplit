@@ -4,7 +4,7 @@ const Expense = require("../models/Expense");
 const Payment = require("../models/Payment");
 const Roommate = require("../models/Roommate");
 
-// Get /balances
+//get balance
 router.get("/", async function(req, res){
   try{
     const roommates= await Roommate.find();
@@ -23,21 +23,30 @@ router.get("/", async function(req, res){
 
     expenses.forEach(function(expense){
       if (expense.paidBy && bal[expense.paidBy]){
-        bal[expense.paidBy].paid+= expense.amount;
+        bal[expense.paidBy].paid += expense.amount;
       }
-      if (expense.splits && expense.splits.length > 0){
-        const newSplit= expense.splits[expense.splits.length- 1];
-        newSplit.splitDetails.forEach(function(split){
-          if(bal[split.roommateId]){
-            bal[split.roommateId].owed+= split.amountOwed;
-          }
-        });
+
+     //calculate the split 
+      const participants = expense.splitWith || [];
+      const numPeople = participants.length + 1; 
+      const sharePerPerson = expense.amount / numPeople;
+
+      // 3. Update "Owed" for the Payer (They owe their own share)
+      if (expense.paidBy && bal[expense.paidBy]) {
+        bal[expense.paidBy].owed += sharePerPerson;
       }
+
+     //updated owed 
+      participants.forEach(function(participantId){
+        if(bal[participantId]){
+          bal[participantId].owed += sharePerPerson;
+        }
+      });
     });
 
     payments.forEach(function (payment){
       if (bal[payment.fromRoommate]){
-        bal[payment.fromRoommate].paid-= payment.amount;
+        bal[payment.fromRoommate].paid += payment.amount;
       }
     });
 
